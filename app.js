@@ -94,4 +94,43 @@ document.addEventListener('DOMContentLoaded', () => {
         copyBtn.disabled = true;
         clearBtn.disabled = true;
     });
+
+    // QR Code Generator Logic
+    const linkInput = document.getElementById('link-input');
+    const generateBtn = document.getElementById('generate-btn');
+    const qrcodeDisplay = document.getElementById('qrcode-display');
+    let qrcodeInstance = null;
+
+    function generateQRCode() {
+        const text = linkInput.value.trim();
+        if (!text) {
+            alert('Please enter a valid link or text');
+            return;
+        }
+
+        // Clear existing content
+        qrcodeDisplay.innerHTML = '';
+
+        try {
+            qrcodeInstance = new QRCode(qrcodeDisplay, {
+                text: text,
+                width: 200,
+                height: 200,
+                colorDark: "#000000",
+                colorLight: "#ffffff",
+                correctLevel: QRCode.CorrectLevel.H
+            });
+        } catch (err) {
+            console.error('Error generating QR code:', err);
+            qrcodeDisplay.innerHTML = '<p class="placeholder-text" style="color: red;">Failed to generate QR code.</p>';
+        }
+    }
+
+    generateBtn.addEventListener('click', generateQRCode);
+
+    linkInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            generateQRCode();
+        }
+    });
 });

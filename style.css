@@ -29,7 +29,7 @@ body {
     padding: 20px;
     display: flex;
     flex-direction: column;
-    height: 100vh;
+    min-height: 100vh;
 }
 
 header {
@@ -131,6 +131,67 @@ main {
 
 #clear-btn:hover:not(:disabled) {
     background-color: #dde0e3;
+}
+
+.generator-container {
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.generator-container h2 {
+    font-size: 18px;
+    margin-bottom: 15px;
+    color: var(--text-color);
+}
+
+.generator-input-group {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.input-field {
+    flex: 1;
+    padding: 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.input-field:focus {
+    border-color: var(--primary-color);
+}
+
+.primary-btn {
+    background-color: var(--primary-color);
+    color: white;
+    white-space: nowrap;
+}
+
+.primary-btn:hover:not(:disabled) {
+    background-color: #357abd;
+}
+
+.qrcode-display-box {
+    background-color: #f8f9fa;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 20px;
+    min-height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+}
+
+.qrcode-display-box img,
+.qrcode-display-box canvas {
+    max-width: 100%;
+    height: auto;
 }
 
 .btn:disabled {
