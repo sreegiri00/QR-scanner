@@ -17,7 +17,18 @@
         </header>
 
         <main>
-            <div id="reader" class="scanner-container"></div>
+            <div class="scanner-wrapper">
+                <div class="camera-controls">
+                    <div class="camera-select-group">
+                        <label for="camera-select">Camera:</label>
+                        <select id="camera-select" class="select-field">
+                            <option value="">Loading cameras...</option>
+                        </select>
+                    </div>
+                    <button id="switch-camera-btn" class="btn secondary-btn" type="button" disabled>Switch Camera</button>
+                </div>
+                <div id="reader" class="scanner-container"></div>
+            </div>
             
             <div class="result-container">
                 <h2>Scan Result</h2>
