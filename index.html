@@ -18,16 +18,37 @@
 
         <main>
             <div class="scanner-wrapper">
-                <div class="camera-controls">
-                    <div class="camera-select-group">
-                        <label for="camera-select">Camera:</label>
-                        <select id="camera-select" class="select-field">
-                            <option value="">Loading cameras...</option>
-                        </select>
-                    </div>
-                    <button id="switch-camera-btn" class="btn secondary-btn" type="button" disabled>Switch Camera</button>
+                <div class="method-select-group">
+                    <label for="method-select">Scan Method:</label>
+                    <select id="method-select" class="select-field">
+                        <option value="camera" selected>Camera Scan</option>
+                        <option value="file">Upload Image File</option>
+                    </select>
                 </div>
-                <div id="reader" class="scanner-container"></div>
+
+                <div id="camera-section" class="scan-section">
+                    <div class="camera-controls">
+                        <div class="camera-select-group">
+                            <label for="camera-select">Camera:</label>
+                            <select id="camera-select" class="select-field">
+                                <option value="environment">Back Camera (Environment)</option>
+                                <option value="user">Front Camera (User)</option>
+                            </select>
+                        </div>
+                        <button id="switch-camera-btn" class="btn secondary-btn" type="button">Switch Camera</button>
+                    </div>
+                    <div id="reader" class="scanner-container"></div>
+                </div>
+
+                <div id="file-section" class="scan-section hidden">
+                    <div class="file-input-group">
+                        <label for="qr-input-file" class="file-input-label">Choose QR Code Image:</label>
+                        <input type="file" id="qr-input-file" accept="image/*" class="input-field file-input" />
+                    </div>
+                    <div id="file-scanner-preview" class="file-preview-container">
+                        <p class="placeholder-text">Select an image file above to scan for QR code</p>
+                    </div>
+                </div>
             </div>
             
             <div class="result-container">
