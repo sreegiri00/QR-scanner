@@ -347,3 +347,9 @@ footer {
     border-radius: 4px;
     margin: 10px;
 }
+
+.pos{
+    position: relative;
+    align-items: right;
+    width: 100%;
+}

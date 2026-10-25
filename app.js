@@ -11,9 +11,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const switchCameraBtn = document.getElementById('switch-camera-btn');
     const qrInputFile = document.getElementById('qr-input-file');
     const fileScannerPreview = document.getElementById('file-scanner-preview');
-    
+
     let html5Qrcode = null;
-    let isScanning = false;
+    let isScanning = true;
     let camerasList = [];
     let lastScanResult = null;
     let cameraListPopulated = false;
@@ -23,15 +23,15 @@ document.addEventListener('DOMContentLoaded', () => {
         if (decodedText === lastScanResult) {
             return;
         }
-        
+
         lastScanResult = decodedText;
-        
+
         // Clear previous result securely
         resultBox.innerHTML = '';
-        
+
         // Check if the result is a safe URL (http or https)
         const isSafeUrl = isSafeHttpUrl(decodedText);
-        
+
         if (isSafeUrl) {
             const linkElement = document.createElement('a');
             linkElement.href = decodedText;
@@ -44,15 +44,15 @@ document.addEventListener('DOMContentLoaded', () => {
             pElement.textContent = decodedText;
             resultBox.appendChild(pElement);
         }
-        
+
         // Enable buttons
         copyBtn.disabled = false;
         clearBtn.disabled = false;
-        
+
         // Visual feedback
         resultBox.style.backgroundColor = '#e8f5e9';
         resultBox.style.borderColor = '#28a745';
-        
+
         setTimeout(() => {
             resultBox.style.backgroundColor = '';
             resultBox.style.borderColor = '';
@@ -317,12 +317,16 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Initialize camera mode on page load
-    initScanner();
+    // initScanner();
+    // Initialize file selection by default
+    methodSelect.value = 'file';
+    cameraSection.classList.add('hidden');
+    fileSection.classList.remove('hidden');
 
     // Event Listeners for action buttons
     copyBtn.addEventListener('click', async () => {
         if (!lastScanResult) return;
-        
+
         try {
             await navigator.clipboard.writeText(lastScanResult);
             const originalText = copyBtn.innerText;

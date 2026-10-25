@@ -1,84 +1,188 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>QR Code Scanner</title>
+
     <link rel="stylesheet" href="style.css">
-    <!-- Include the html5-qrcode library -->
+
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
-    <!-- Include qrcode.js library for generating QR codes -->
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" type="text/javascript"></script>
 </head>
+
 <body>
     <div class="app-container">
+
         <header>
             <h1>QR Code Scanner</h1>
+            <p>Scan and generate QR codes easily</p>
         </header>
 
         <main>
-            <div class="scanner-wrapper">
+
+            <!-- Initial Home Screen -->
+            <div id="home-section" >
+            </div>
+
+            <!-- Scanner Section: Hidden Initially -->
+            <section id="scanner-section" class="">
+
+                <button id="open-generator-btn" class="btn primary-btn pos">
+                    Generate QR Code
+                </button>
+
+                <h2>Scan QR Code</h2>
+
                 <div class="method-select-group">
                     <label for="method-select">Scan Method:</label>
+
                     <select id="method-select" class="select-field">
                         <option value="file">Upload Image File</option>
-                        <option value="camera" selected>Camera Scan</option>
+                        <option value="camera">Camera Scan</option>
                     </select>
                 </div>
 
-                <div id="camera-section" class="scan-section">
+                <!-- Camera Scanner -->
+                <div id="camera-section" class="scan-section hidden">
+
                     <div class="camera-controls">
                         <div class="camera-select-group">
                             <label for="camera-select">Camera:</label>
+
                             <select id="camera-select" class="select-field">
-                                <option value="environment">Back Camera (Environment)</option>
-                                <option value="user">Front Camera (User)</option>
+                                <option value="environment">
+                                    Back Camera
+                                </option>
+                                <option value="user">
+                                    Front Camera
+                                </option>
                             </select>
                         </div>
-                        <button id="switch-camera-btn" class="btn secondary-btn" type="button">Switch Camera</button>
+
+                        <button id="switch-camera-btn" class="btn secondary-btn" type="button">
+                            Switch Camera
+                        </button>
                     </div>
+
                     <div id="reader" class="scanner-container"></div>
                 </div>
 
-                <div id="file-section" class="scan-section hidden">
+                <!-- Image Upload Scanner -->
+                <div id="file-section" class="scan-section">
                     <div class="file-input-group">
-                        <label for="qr-input-file" class="file-input-label">Choose QR Code Image:</label>
-                        <input type="file" id="qr-input-file" accept="image/*" class="input-field file-input" />
-                    </div>
-                    <div id="file-scanner-preview" class="file-preview-container">
-                        <p class="placeholder-text">Select an image file above to scan for QR code</p>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="result-container">
-                <h2>Scan Result</h2>
-                <div id="result" class="result-box">
-                    <p class="placeholder-text">Waiting for a scan...</p>
-                </div>
-                <div class="actions">
-                    <button id="copy-btn" class="btn" disabled>Copy</button>
-                    <button id="clear-btn" class="btn" disabled>Clear</button>
-                </div>
-            </div>
+                        <label for="qr-input-file">
+                            Choose QR Code Image:
+                        </label>
 
-            <div class="generator-container">
-                <h2>Generate QR Code</h2>
-                <div class="generator-input-group">
-                    <input type="url" id="link-input" placeholder="Enter link or text (e.g. https://example.com)" class="input-field" />
-                    <button id="generate-btn" class="btn primary-btn">Generate QR</button>
+                        <input type="file" id="qr-input-file" accept="image/*" class="input-field">
+                    </div>
+
+                    <div id="file-scanner-preview" class="file-preview-container">
+                        <p class="placeholder-text">
+                            Select an image to scan its QR code.
+                        </p>
+                    </div>
                 </div>
-                <div id="qrcode-display" class="qrcode-display-box">
-                    <p class="placeholder-text">Generated QR code will appear here</p>
+
+                <!-- Scan Result -->
+                <div class="result-container">
+                    <h2>Scan Result</h2>
+
+                    <div id="result" class="result-box">
+                        <p class="placeholder-text">
+                            Waiting for a scan...
+                        </p>
+                    </div>
+
+                    <div class="actions">
+                        <button id="copy-btn" class="btn" disabled>
+                            Copy
+                        </button>
+
+                        <button id="clear-btn" class="btn" disabled>
+                            Clear
+                        </button>
+                    </div>
                 </div>
-            </div>
+
+            </section>
+
+            <!-- QR Generator: Hidden Initially -->
+            <section id="generator-section" class="hidden">
+
+                <button id="open-scanner-btn" class="btn primary-btn pos">
+                    Scan QR Code
+                </button>
+
+                <div class="generator-container">
+                    <h2>Generate QR Code</h2>
+
+                    <div class="generator-input-group">
+                        <input type="text" id="link-input" placeholder="Enter a link or text" class="input-field">
+
+                        <button id="generate-btn" class="btn primary-btn">
+                            Generate QR
+                        </button>
+                    </div>
+
+                    <div id="qrcode-display" class="qrcode-display-box">
+                        <p class="placeholder-text">
+                            Your QR code will appear here.
+                        </p>
+                    </div>
+                </div>
+
+            </section>
+
         </main>
-        
+
         <footer>
             <p>Powered by html5-qrcode</p>
         </footer>
+
     </div>
 
     <script src="app.js"></script>
+
+    <!-- Screen navigation -->
+    <script>
+        const home = document.getElementById("home-section");
+        const scanner = document.getElementById("scanner-section");
+        const generator = document.getElementById("generator-section");
+
+        function showScreen(screen) {
+            home.classList.add("hidden");
+            scanner.classList.add("hidden");
+            generator.classList.add("hidden");
+
+            screen.classList.remove("hidden");
+        }
+
+        document.getElementById("open-scanner-btn")
+            .addEventListener("click", () => {
+                showScreen(scanner);
+            });
+
+        document.getElementById("open-generator-btn")
+            .addEventListener("click", () => {
+                showScreen(generator);
+            });
+
+        document.getElementById("back-home-btn")
+            .addEventListener("click", () => {
+                showScreen(home);
+            });
+
+        document.getElementById("generator-back-btn")
+            .addEventListener("click", () => {
+                showScreen(home);
+            });
+    </script>
+
 </body>
+
 </html>
+```
