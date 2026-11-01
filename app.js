@@ -2,9 +2,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const resultBox = document.getElementById('result');
     const copyBtn = document.getElementById('copy-btn');
     const clearBtn = document.getElementById('clear-btn');
+    const cameraSelect = document.getElementById('camera-select');
+    const switchCameraBtn = document.getElementById('switch-camera-btn');
     
-    let html5QrcodeScanner = null;
+    let html5Qrcode = null;
+    let isScanning = false;
+    let camerasList = [];
     let lastScanResult = null;
+    let cameraListPopulated = false;
 
     // Function to handle successful scans
     function onScanSuccess(decodedText, decodedResult) {
@@ -50,7 +55,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function onScanFailure(error) {
         // handle scan failure, usually better to ignore and keep scanning.
-        // console.warn(`Code scan error = ${error}`);
     }
 
     // Utility function to check if string is a safe HTTP/HTTPS URL
@@ -63,13 +67,143 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Initialize scanner
-    html5QrcodeScanner = new Html5QrcodeScanner(
-        "reader",
-        { fps: 10, qrbox: {width: 250, height: 250} },
-        /* verbose= */ false
-    );
-    html5QrcodeScanner.render(onScanSuccess, onScanFailure);
+    // Find back camera from list of camera devices
+    function findBackCamera(devices) {
+        if (!devices || devices.length === 0) return null;
+
+        const backKeywords = ['back', 'rear', 'environment', 'facing back', '0, facing back'];
+        for (const device of devices) {
+            const label = (device.label || '').toLowerCase();
+            if (backKeywords.some(keyword => label.includes(keyword))) {
+                return device;
+            }
+        }
+        // On mobile devices with multiple cameras, back camera is often the last device listed
+        if (devices.length > 1) {
+            return devices[devices.length - 1];
+        }
+        return devices[0];
+    }
+
+    function populateCameraSelect(devices) {
+        cameraSelect.innerHTML = '';
+        devices.forEach((device, index) => {
+            const option = document.createElement('option');
+            option.value = device.id;
+            option.textContent = device.label || `Camera ${index + 1}`;
+            cameraSelect.appendChild(option);
+        });
+        cameraSelect.disabled = devices.length <= 1;
+        switchCameraBtn.disabled = devices.length <= 1;
+    }
+
+    async function startScanning(cameraSource) {
+        if (isScanning && html5Qrcode) {
+            try {
+                await html5Qrcode.stop();
+                isScanning = false;
+            } catch (err) {
+                console.error('Error stopping previous scan session:', err);
+            }
+        }
+
+        const config = { fps: 10, qrbox: { width: 250, height: 250 } };
+
+        try {
+            await html5Qrcode.start(
+                cameraSource,
+                config,
+                onScanSuccess,
+                onScanFailure
+            );
+            isScanning = true;
+
+            // Once camera is active, refresh camera list if labels were not available initially
+            refreshCameraListIfNeeded();
+        } catch (err) {
+            console.error('Error starting scanner:', err);
+        }
+    }
+
+    async function refreshCameraListIfNeeded() {
+        try {
+            const devices = await Html5Qrcode.getCameras();
+            if (devices && devices.length > 0) {
+                camerasList = devices;
+                const hasLabels = devices.some(d => d.label && d.label.trim() !== '');
+                if (hasLabels || !cameraListPopulated) {
+                    const currentSelected = cameraSelect.value;
+                    populateCameraSelect(devices);
+                    if (currentSelected && devices.some(d => d.id === currentSelected)) {
+                        cameraSelect.value = currentSelected;
+                    }
+                    cameraListPopulated = hasLabels;
+                }
+            }
+        } catch (e) {
+            console.warn('Could not enumerate cameras:', e);
+        }
+    }
+
+    async function initScanner() {
+        html5Qrcode = new Html5Qrcode('reader');
+
+        try {
+            const devices = await Html5Qrcode.getCameras();
+            if (devices && devices.length > 0) {
+                camerasList = devices;
+                populateCameraSelect(devices);
+
+                const defaultCamera = findBackCamera(devices);
+                const cameraSource = defaultCamera ? defaultCamera.id : { facingMode: 'environment' };
+
+                if (defaultCamera) {
+                    cameraSelect.value = defaultCamera.id;
+                }
+
+                await startScanning(cameraSource);
+            } else {
+                // Fallback to back camera using facingMode environment
+                cameraSelect.innerHTML = '<option value="environment">Back Camera (Environment)</option>';
+                await startScanning({ facingMode: 'environment' });
+            }
+        } catch (err) {
+            console.warn('Unable to query cameras beforehand, defaulting to environment facingMode:', err);
+            cameraSelect.innerHTML = '<option value="environment">Back Camera (Environment)</option>';
+            await startScanning({ facingMode: 'environment' });
+        }
+    }
+
+    // Camera control event listeners
+    cameraSelect.addEventListener('change', async () => {
+        const selectedValue = cameraSelect.value;
+        if (!selectedValue) return;
+
+        if (selectedValue === 'environment' || selectedValue === 'user') {
+            await startScanning({ facingMode: selectedValue });
+        } else {
+            await startScanning(selectedValue);
+        }
+    });
+
+    switchCameraBtn.addEventListener('click', async () => {
+        if (camerasList.length > 1) {
+            const currentIndex = camerasList.findIndex(c => c.id === cameraSelect.value);
+            const nextIndex = (currentIndex + 1) % camerasList.length;
+            const nextCamera = camerasList[nextIndex];
+            cameraSelect.value = nextCamera.id;
+            await startScanning(nextCamera.id);
+        } else {
+            // Toggle facingMode between environment (back) and user (front)
+            const currentVal = cameraSelect.value;
+            const newVal = currentVal === 'user' ? 'environment' : 'user';
+            cameraSelect.innerHTML = `<option value="${newVal}">${newVal === 'environment' ? 'Back Camera' : 'Front Camera'}</option>`;
+            cameraSelect.value = newVal;
+            await startScanning({ facingMode: newVal });
+        }
+    });
+
+    initScanner();
 
     // Event Listeners for buttons
     copyBtn.addEventListener('click', async () => {
